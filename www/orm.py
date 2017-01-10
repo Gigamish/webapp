@@ -14,7 +14,7 @@ async def create_pool(loop, **kw):
     logging.info('create database connection pool...')
     global __pool
     __pool = await aiomysql.create_pool(
-        host=kw.get('host', 'localhost'),
+        host=kw.get('host'),
         port=kw.get('port', 3306),
         user=kw['user'],
         password=kw['password'],
@@ -25,6 +25,13 @@ async def create_pool(loop, **kw):
         minsize=kw.get('minsize', 1),
         loop=loop
     )
+
+@asyncio.coroutine
+def destroy_pool():
+    global __pool
+    if __pool is not None:
+        __pool.close()
+        yield from __pool.wait_closed()
 
 async def select(sql, args, size=None):
     log(sql, args)
